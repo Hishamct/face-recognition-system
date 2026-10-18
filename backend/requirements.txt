@@ -1,0 +1,25 @@
+# ============================================================
+# Backend Dependencies — Face Detection & Recognition System
+# ============================================================
+
+# Web Framework & API Server
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+
+# Database & ORM
+sqlalchemy>=2.0.28
+psycopg2-binary>=2.9.9
+alembic>=1.13.1
+
+# Configuration & Utilities
+python-dotenv>=1.0.1
+pyyaml>=6.0.1
+httpx>=0.27.0
+pytest>=8.0.0
+
+# Computer Vision & Math (Core)
+numpy>=1.26.0
+opencv-python>=4.9.0.80
+pillow>=10.2.0

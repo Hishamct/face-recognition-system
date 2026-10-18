@@ -1,0 +1,9 @@
+# Face Detection Configuration
+detector:
+  model_name: scrfd_2.5g
+  confidence_threshold: 0.6
+  nms_threshold: 0.4
+  input_size: [640, 640]
+  device: cpu # or 'cuda' if GPU available
+  align_faces: true
+  canonical_crop_size: [112, 112]

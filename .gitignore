@@ -1,0 +1,94 @@
+# ============================================================
+# FACE DETECTION & RECOGNITION SYSTEM — .gitignore
+# ============================================================
+
+# ─── Private Notes (Never push) ─────────────────────────────
+hisham-notes/
+
+# ─── Face Image Data (Privacy + Size) ───────────────────────
+data/raw/
+data/processed/
+data/database/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.mp4
+*.avi
+*.mov
+*.webm
+
+# ─── Trained Model Weights (Too large for Git) ──────────────
+models/
+*.pt
+*.pth
+*.onnx
+*.bin
+*.pkl
+*.h5
+
+# ─── FAISS Index Files ───────────────────────────────────────
+*.index
+faiss_index*
+
+# ─── Python Environment ─────────────────────────────────────
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ─── Environment Variables (Secrets) ────────────────────────
+.env
+.env.local
+.env.development
+.env.production
+*.env
+
+# ─── Node / React / Vite ────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/.eslintcache
+
+# ─── Database Files ─────────────────────────────────────────
+*.sql
+*.db
+*.sqlite
+*.sqlite3
+
+# ─── IDE & Editor ───────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Logs ────────────────────────────────────────────────────
+*.log
+logs/
+backend/logs/
+
+# ─── Jupyter Notebooks (Optional — remove if you use them) ──
+.ipynb_checkpoints/
+*.ipynb
+
+# ─── pytest Cache ────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ─── Reports (Generated outputs, not source) ─────────────────
+reports/*.pdf
+reports/*.html

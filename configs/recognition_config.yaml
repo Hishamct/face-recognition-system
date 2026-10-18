@@ -1,0 +1,10 @@
+# Face Recognition & Matching Configuration
+recognition:
+  model_name: arcface_iresnet50
+  embedding_dimension: 512
+  metric: cosine
+  threshold_min: 0.40
+  threshold_max: 0.85
+  default_decision_threshold: 0.65
+  unknown_label: "Unknown"
+  faiss_index_type: IndexFlatIP # exact inner-product (cosine similarity for normalized vectors)
