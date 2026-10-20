@@ -138,6 +138,8 @@ def organize_and_filter(
 
     Returns dict: identity_name -> accepted_image_count
     """
+    if raw_dir.exists():
+        shutil.rmtree(raw_dir)
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     identity_dirs = sorted([d for d in lfw_dir.iterdir() if d.is_dir()])
@@ -170,19 +172,22 @@ def organize_and_filter(
             else:
                 rejection_reasons[reason] = rejection_reasons.get(reason, 0) + 1
 
-        if accepted == 0:
-            # Remove empty directory if all images were rejected
-            out_dir.rmdir()
+        if accepted < min_images:
+            # If usable count drops below min_images after quality filter, purge identity
+            shutil.rmtree(out_dir)
+            rejection_reasons["below_min_usable"] = rejection_reasons.get("below_min_usable", 0) + 1
         else:
             identity_counts[identity_name] = accepted
 
     total_rejected = sum(rejection_reasons.values())
     print("\n[OK] Quality filter complete.")
-    print("  Accepted identities : {}".format(len(identity_counts)))
-    print("  Total rejected images: {}".format(total_rejected))
+    print("  Accepted identities (>= {} usable images): {}".format(min_images, len(identity_counts)))
+    print("  Identities purged (< {} usable images)   : {}".format(min_images, rejection_reasons.get("below_min_usable", 0)))
+    print("  Total rejected individual images        : {}".format(total_rejected - rejection_reasons.get("below_min_usable", 0)))
     for reason, count in rejection_reasons.items():
         if count > 0:
             print("    - {}: {}".format(reason, count))
+
 
     return identity_counts
 

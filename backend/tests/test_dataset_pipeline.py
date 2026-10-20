@@ -74,3 +74,41 @@ def test_individual_transforms_work():
     for name, t in transforms.items():
         res = t(image=dummy_face)["image"]
         assert res.shape == (112, 112, 3), f"Transform {name} changed image dimensions"
+
+
+def test_per_identity_counts_adequate(repo_root: Path):
+    manifest_path = repo_root / "reports" / "dataset_summary.csv"
+    with open(manifest_path, encoding="utf-8") as f:
+        reader = list(csv.DictReader(f))
+
+    assert len(reader) == 150, f"Expected exactly 150 filtered identities, found {len(reader)}"
+    for row in reader:
+        # Every identity must meet the minimum partition constraints
+        assert int(row["train_count"]) >= 6, f"Identity {row['identity']} has < 6 train images"
+        assert int(row["val_count"]) >= 2, f"Identity {row['identity']} has < 2 val images"
+        assert int(row["test_count"]) >= 2, f"Identity {row['identity']} has < 2 test images"
+        assert int(row["total_images"]) >= 10, f"Identity {row['identity']} has < 10 total usable images"
+
+
+def test_yunet_detector_smoke_test(repo_root: Path):
+    model_path = repo_root / "models" / "face_detection_yunet_2023mar.onnx"
+    assert model_path.exists(), "YuNet ONNX model must exist in models/"
+
+    detector = cv2.FaceDetectorYN.create(
+        model=str(model_path),
+        config="",
+        input_size=(250, 250),
+        score_threshold=0.75,
+    )
+
+    sample_imgs = list((repo_root / "data" / "processed" / "train").rglob("*.jpg"))
+    assert len(sample_imgs) > 0, "Training images must exist"
+
+    sample = cv2.imread(str(sample_imgs[0]))
+    h, w = sample.shape[:2]
+    detector.setInputSize((w, h))
+    ret, detections = detector.detect(sample)
+
+    assert ret == 1, "Detector inference must return code 1"
+    assert detections is not None and len(detections) >= 1, "Must detect face in sample image"
+    assert detections[0].shape == (15,), "Face detection array must have 15 elements (bbox + 5 landmarks + score)"
