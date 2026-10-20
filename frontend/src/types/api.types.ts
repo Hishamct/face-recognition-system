@@ -1,8 +1,13 @@
 export interface BoundingBox {
-  x: number;
-  y: number;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
+  x?: number;
+  y?: number;
   width: number;
   height: number;
+  confidence?: number;
 }
 
 export interface LandmarkPoint {
@@ -14,8 +19,10 @@ export interface Landmarks5 {
   right_eye: LandmarkPoint;
   left_eye: LandmarkPoint;
   nose_tip: LandmarkPoint;
-  right_mouth_corner: LandmarkPoint;
-  left_mouth_corner: LandmarkPoint;
+  right_mouth_corner?: LandmarkPoint;
+  left_mouth_corner?: LandmarkPoint;
+  mouth_right?: LandmarkPoint;
+  mouth_left?: LandmarkPoint;
 }
 
 export interface FaceDetectionItem {

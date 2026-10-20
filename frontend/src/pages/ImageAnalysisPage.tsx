@@ -258,8 +258,7 @@ export const ImageAnalysisPage: React.FC = () => {
                   <div className="flex justify-between">
                     <span>Bounding Box:</span>
                     <span className="text-slate-200">
-                      [{currentFace.bbox.x}, {currentFace.bbox.y}, {currentFace.bbox.width}x
-                      {currentFace.bbox.height}]
+                      [{currentFace.bbox.x1 ?? (currentFace.bbox as any).x ?? 0}, {currentFace.bbox.y1 ?? (currentFace.bbox as any).y ?? 0}, {currentFace.bbox.width}x{currentFace.bbox.height}]
                     </span>
                   </div>
                   <div className="flex justify-between">
