@@ -49,7 +49,7 @@ export const IdentityManagementPage: React.FC = () => {
     setError(null);
     try {
       const data = await api.listIdentities(0, 100);
-      setIdentities(data.identities);
+      setIdentities(data.items || data.identities || []);
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message || 'Failed to load identities');
     } finally {
@@ -114,14 +114,18 @@ export const IdentityManagementPage: React.FC = () => {
   };
 
   // Filtered identities
-  const filteredIdentities = identities.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const safeIdentities = identities || [];
+  const filteredIdentities = safeIdentities.filter((item) => {
+    const matchesSearch = item.name ? item.name.toLowerCase().includes(searchQuery.toLowerCase()) : false;
     const matchesDept =
       selectedDept === 'ALL' || (item.department && item.department === selectedDept);
     return matchesSearch && matchesDept;
   });
 
-  const totalExemplars = identities.reduce((acc, curr) => acc + (curr.exemplar_count || 0), 0);
+  const totalExemplars = safeIdentities.reduce(
+    (acc, curr) => acc + (curr.embedding_count ?? curr.exemplar_count ?? 0),
+    0
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -273,7 +277,7 @@ export const IdentityManagementPage: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-5 py-3.5 font-mono text-slate-300">
-                    {item.exemplar_count} vectors
+                    {item.embedding_count ?? item.exemplar_count ?? 0} vectors
                   </td>
                   <td className="px-5 py-3.5 text-slate-400">
                     {new Date(item.created_at).toLocaleDateString()}

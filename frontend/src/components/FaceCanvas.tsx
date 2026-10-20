@@ -40,8 +40,12 @@ export const FaceCanvas: React.FC<FaceCanvasProps> = ({
         const { x, y, width, height } = face.bbox;
 
         // Colors (refined, non-neon)
-        const primaryColor = face.is_known ? '#6366F1' : '#F59E0B'; // Indigo for known, Amber for unknown
-        const fillColor = face.is_known ? 'rgba(99, 102, 241, 0.08)' : 'rgba(245, 158, 11, 0.08)';
+        const isKnown =
+          face.status === 'RECOGNIZED' ||
+          face.is_known === true ||
+          (Boolean(face.identity) && face.identity?.toUpperCase() !== 'UNKNOWN');
+        const primaryColor = isKnown ? '#6366F1' : '#F59E0B'; // Indigo for known, Amber for unknown
+        const fillColor = isKnown ? 'rgba(99, 102, 241, 0.08)' : 'rgba(245, 158, 11, 0.08)';
 
         // 1. Semi-transparent bounding box fill
         ctx.fillStyle = fillColor;
@@ -112,8 +116,8 @@ export const FaceCanvas: React.FC<FaceCanvasProps> = ({
         }
 
         // 5. Clean, dark label pill
-        const nameText = face.matched_name;
-        const confPercent = (face.confidence * 100).toFixed(1);
+        const nameText = face.identity || face.matched_name || 'Unknown';
+        const confPercent = ((face.confidence ?? 0) * 100).toFixed(1);
         const labelText = `${nameText} · ${confPercent}%`;
 
         ctx.font = '500 13px Inter, sans-serif';
@@ -135,7 +139,7 @@ export const FaceCanvas: React.FC<FaceCanvasProps> = ({
         ctx.stroke();
 
         // Status circle dot
-        ctx.fillStyle = face.is_known ? '#10B981' : '#F59E0B';
+        ctx.fillStyle = isKnown ? '#10B981' : '#F59E0B';
         ctx.beginPath();
         ctx.arc(pillX + 10, pillY + pillHeight / 2, 4, 0, 2 * Math.PI);
         ctx.fill();

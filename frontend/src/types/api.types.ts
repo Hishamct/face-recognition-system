@@ -19,52 +19,70 @@ export interface Landmarks5 {
 }
 
 export interface FaceDetectionItem {
-  face_id: number;
+  face_id?: number;
   bbox: BoundingBox;
   confidence: number;
   landmarks: Landmarks5;
 }
 
 export interface DetectionResponse {
-  total_faces: number;
+  success?: boolean;
+  face_count?: number;
+  total_faces?: number;
   image_width: number;
   image_height: number;
-  inference_time_ms: number;
+  latency_ms?: number;
+  inference_time_ms?: number;
   faces: FaceDetectionItem[];
 }
 
 export interface CandidateItem {
-  identity_name: string;
-  similarity: number;
+  identity?: string;
+  identity_name?: string;
+  confidence?: number;
+  similarity?: number;
   probability?: number | null;
+  rank?: number;
 }
 
 export interface FaceRecognitionItem {
-  face_id: number;
+  face_id?: number;
   bbox: BoundingBox;
   landmarks: Landmarks5;
-  matched_name: string;
+  identity?: string;
+  matched_name?: string;
   confidence: number;
-  is_known: boolean;
+  status?: string; // 'RECOGNIZED' | 'UNKNOWN'
+  is_known?: boolean;
   threshold_used: number;
-  candidates: CandidateItem[];
+  top_candidates?: CandidateItem[];
+  candidates?: CandidateItem[];
 }
 
 export interface RecognitionResponse {
-  total_faces: number;
+  success?: boolean;
+  face_count?: number;
+  total_faces?: number;
+  recognized_count?: number;
+  unknown_count?: number;
   image_width: number;
   image_height: number;
-  inference_time_ms: number;
+  latency_ms?: number;
+  inference_time_ms?: number;
   faces: FaceRecognitionItem[];
 }
 
 export interface RecognitionAuditItem {
   id: number;
-  timestamp: string;
-  face_count: number;
+  timestamp?: string;
+  created_at?: string;
+  face_count?: number;
   matched_identity?: string | null;
+  similarity_score?: number | null;
   top_confidence?: number | null;
   is_known?: boolean | null;
+  decision?: string | null;
+  query_latency_ms?: number | null;
   inference_time_ms?: number | null;
 }
 
@@ -73,44 +91,68 @@ export interface IdentityResponse {
   name: string;
   department?: string | null;
   notes?: string | null;
-  exemplar_count: number;
-  has_prototype: boolean;
+  is_active?: boolean;
+  embedding_count?: number;
+  exemplar_count?: number;
+  has_prototype?: boolean;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface IdentityListResponse {
   total: number;
-  skip: number;
-  limit: number;
-  identities: IdentityResponse[];
+  page?: number;
+  page_size?: number;
+  skip?: number;
+  limit?: number;
+  items?: IdentityResponse[];
+  identities?: IdentityResponse[];
 }
 
 export interface IdentityEnrollResponse {
+  success?: boolean;
   message: string;
-  identity: IdentityResponse;
+  identity_id?: number;
+  name?: string;
+  identity?: IdentityResponse;
+  vector_id?: number;
+  embedding_count?: number;
 }
 
 export interface IdentityDeleteResponse {
+  success?: boolean;
   message: string;
   identity_id: number;
-  deleted_embeddings_count: number;
+  deleted_embeddings_count?: number;
 }
 
 export interface EvaluationMetricsResponse {
-  benchmark_name: string;
-  dataset_partition: string;
+  id?: number | null;
+  evaluation_name?: string;
+  benchmark_name?: string;
+  dataset_partition?: string;
+  model_version?: string;
+  gallery_version?: string;
   total_pairs?: number | null;
   genuine_pairs?: number | null;
   impostor_pairs?: number | null;
-  calibrated_threshold: number;
+  threshold_used?: number;
+  calibrated_threshold?: number;
+  rank1_acc?: number;
+  top5_acc?: number;
+  top10_acc?: number | null;
+  mrr?: number;
+  tpir?: number;
   fpir: number;
-  fnir: number;
+  fnir?: number;
   tar_at_far_01?: number | null;
   tar_at_far_001?: number | null;
   eer?: number | null;
   auc?: number | null;
-  timestamp: string;
+  macro_auc?: number | null;
+  micro_auc?: number | null;
+  tested_at?: string | null;
+  timestamp?: string;
 }
 
 export interface TrainingRunItem {
@@ -150,7 +192,7 @@ export interface TrainingHistoryResponse {
 
 export interface HealthResponse {
   status: string;
-  environment: string;
-  version: string;
+  environment?: string;
+  version?: string;
   database?: string;
 }

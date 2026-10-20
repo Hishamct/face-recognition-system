@@ -6,6 +6,8 @@ import IdentityManagementPage from './pages/IdentityManagementPage';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import LiveVideoPage from './pages/LiveVideoPage';
 
+import ErrorBoundary from './components/ErrorBoundary';
+
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
@@ -13,13 +15,15 @@ export const App: React.FC = () => {
         <Navbar />
 
         <main className="flex-1 pb-16">
-          <Routes>
-            <Route path="/" element={<ImageAnalysisPage />} />
-            <Route path="/identities" element={<IdentityManagementPage />} />
-            <Route path="/analytics" element={<AnalyticsDashboard />} />
-            <Route path="/live" element={<LiveVideoPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<ImageAnalysisPage />} />
+              <Route path="/identities" element={<IdentityManagementPage />} />
+              <Route path="/analytics" element={<AnalyticsDashboard />} />
+              <Route path="/live" element={<LiveVideoPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
 
         <footer className="border-t border-slate-800/80 bg-dark-950/80 py-4 text-center text-xs text-slate-500">

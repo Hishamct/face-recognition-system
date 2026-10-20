@@ -66,6 +66,29 @@ export const ImageAnalysisPage: React.FC = () => {
 
   const currentFace: FaceRecognitionItem | undefined = result?.faces?.[selectedFaceIdx];
 
+  // Defensive field resolution
+  const matchedName = currentFace
+    ? currentFace.identity || currentFace.matched_name || 'Unknown'
+    : 'Unknown';
+
+  const isKnown = currentFace
+    ? currentFace.status === 'RECOGNIZED' ||
+      currentFace.is_known === true ||
+      (currentFace.identity && currentFace.identity.toUpperCase() !== 'UNKNOWN')
+    : false;
+
+  const topCandidates = currentFace
+    ? currentFace.top_candidates || currentFace.candidates || []
+    : [];
+
+  const totalFacesDetected = result
+    ? result.face_count ?? result.total_faces ?? result.faces?.length ?? 0
+    : 0;
+
+  const latency = result
+    ? result.latency_ms ?? result.inference_time_ms ?? 0
+    : 0;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
@@ -137,12 +160,12 @@ export const ImageAnalysisPage: React.FC = () => {
               {result && (
                 <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
                   <div className="flex items-center space-x-2">
-                    <span className="font-medium text-white">{result.total_faces}</span>
-                    <span>{result.total_faces === 1 ? 'face detected' : 'faces detected'}</span>
+                    <span className="font-medium text-white">{totalFacesDetected}</span>
+                    <span>{totalFacesDetected === 1 ? 'face detected' : 'faces detected'}</span>
                   </div>
                   <div className="flex items-center space-x-1.5 text-slate-400 font-mono">
                     <Clock className="h-3.5 w-3.5 text-slate-500" />
-                    <span>Inference: {result.inference_time_ms} ms</span>
+                    <span>Inference: {typeof latency === 'number' ? latency.toFixed(1) : latency} ms</span>
                   </div>
                 </div>
               )}
@@ -158,12 +181,12 @@ export const ImageAnalysisPage: React.FC = () => {
               <div className="flex items-start justify-between border-b border-slate-800/80 pb-4">
                 <div className="flex items-center space-x-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 border border-slate-700 text-base font-bold text-slate-200">
-                    {currentFace.matched_name.slice(0, 2).toUpperCase()}
+                    {matchedName.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h2 className="text-base font-bold text-white">{currentFace.matched_name}</h2>
-                      {currentFace.is_known ? (
+                      <h2 className="text-base font-bold text-white">{matchedName}</h2>
+                      {isKnown ? (
                         <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400 border border-emerald-500/20">
                           <CheckCircle2 className="mr-1 h-3 w-3" />
                           VERIFIED
@@ -176,7 +199,7 @@ export const ImageAnalysisPage: React.FC = () => {
                       )}
                     </div>
                     <p className="text-xs text-slate-400">
-                      Face #{currentFace.face_id} · Threshold: τ = {currentFace.threshold_used}
+                      Face #{currentFace.face_id ?? (selectedFaceIdx + 1)} · Threshold: τ = {currentFace.threshold_used}
                     </p>
                   </div>
                 </div>
@@ -194,49 +217,57 @@ export const ImageAnalysisPage: React.FC = () => {
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
                   Top Gallery Matches
                 </h3>
-                <div className="space-y-2.5">
-                  {currentFace.candidates?.map((cand, idx) => {
-                    const pct = (cand.similarity * 100).toFixed(1);
-                    const isTop = idx === 0 && currentFace.is_known;
-                    return (
-                      <div
-                        key={cand.identity_name}
-                        className="rounded-lg bg-slate-800/50 p-2.5 border border-slate-800"
-                      >
-                        <div className="flex items-center justify-between text-xs mb-1.5">
-                          <span className={`font-medium ${isTop ? 'text-white' : 'text-slate-300'}`}>
-                            {cand.identity_name}
-                          </span>
-                          <span className="font-mono text-slate-400">{pct}%</span>
+                {topCandidates.length > 0 ? (
+                  <div className="space-y-2.5">
+                    {topCandidates.map((cand, idx) => {
+                      const candName = cand.identity || cand.identity_name || 'Unknown';
+                      const candScore = cand.confidence ?? cand.similarity ?? 0;
+                      const pct = (candScore * 100).toFixed(1);
+                      const isTop = idx === 0 && isKnown;
+                      return (
+                        <div
+                          key={`${candName}-${idx}`}
+                          className="rounded-lg bg-slate-800/50 p-2.5 border border-slate-800"
+                        >
+                          <div className="flex items-center justify-between text-xs mb-1.5">
+                            <span className={`font-medium ${isTop ? 'text-white' : 'text-slate-300'}`}>
+                              {candName}
+                            </span>
+                            <span className="font-mono text-slate-400">{pct}%</span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                isTop ? 'bg-indigo-500' : 'bg-slate-600'
+                              }`}
+                              style={{ width: `${Math.min(100, Math.max(0, candScore * 100))}%` }}
+                            />
+                          </div>
                         </div>
-                        <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              isTop ? 'bg-indigo-500' : 'bg-slate-600'
-                            }`}
-                            style={{ width: `${Math.min(100, Math.max(0, cand.similarity * 100))}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500">No alternate candidate scores recorded.</p>
+                )}
               </div>
 
               {/* Bounding Box & Landmark Coordinates */}
-              <div className="rounded-lg bg-slate-950/60 p-3 border border-slate-800/80 text-xs font-mono text-slate-400 space-y-1">
-                <div className="flex justify-between">
-                  <span>Bounding Box:</span>
-                  <span className="text-slate-200">
-                    [{currentFace.bbox.x}, {currentFace.bbox.y}, {currentFace.bbox.width}x
-                    {currentFace.bbox.height}]
-                  </span>
+              {currentFace.bbox && (
+                <div className="rounded-lg bg-slate-950/60 p-3 border border-slate-800/80 text-xs font-mono text-slate-400 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Bounding Box:</span>
+                    <span className="text-slate-200">
+                      [{currentFace.bbox.x}, {currentFace.bbox.y}, {currentFace.bbox.width}x
+                      {currentFace.bbox.height}]
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Landmark Points:</span>
+                    <span className="text-slate-200">5 Aligned Anchor Points</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Landmark Points:</span>
-                  <span className="text-slate-200">5 Aligned Anchor Points</span>
-                </div>
-              </div>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-900/30 p-12 text-center">
