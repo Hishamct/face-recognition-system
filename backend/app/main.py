@@ -70,5 +70,6 @@ def api_health():
         "service": settings.PROJECT_NAME,
         "version": "0.1.0",
         "environment": settings.ENVIRONMENT,
+        "database": db_check.get("status", "unknown"),
         "database_connected": db_check.get("status") == "connected"
     }

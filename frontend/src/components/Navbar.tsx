@@ -12,7 +12,12 @@ export const Navbar: React.FC = () => {
       try {
         const res = await api.checkHealth();
         if (isMounted) {
-          if (res.database === 'connected' || res.status === 'ok') {
+          if (
+            res.status === 'healthy' ||
+            res.status === 'ok' ||
+            res.database === 'connected' ||
+            Boolean((res as any).database_connected)
+          ) {
             setDbStatus('connected');
           } else {
             setDbStatus('error');

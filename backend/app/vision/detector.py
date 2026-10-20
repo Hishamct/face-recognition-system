@@ -85,18 +85,39 @@ class YuNetDetector:
             return []
 
         h, w = image.shape[:2]
+        max_dim = 1280
+        scale = 1.0
+        detect_img = image
+
+        # For high-resolution images (> 1280px), downsample for real-time inference speed
+        if max(h, w) > max_dim:
+            scale = max_dim / float(max(h, w))
+            new_w = int(round(w * scale))
+            new_h = int(round(h * scale))
+            detect_img = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+            h, w = new_h, new_w
+
         self._detector.setInputSize((w, h))
 
-        ret, raw_detections = self._detector.detect(image)
+        ret, raw_detections = self._detector.detect(detect_img)
         if raw_detections is None or len(raw_detections) == 0:
             return []
 
         results = []
         for det in raw_detections:
-            bbox = [int(det[0]), int(det[1]), int(det[2]), int(det[3])]
-            score = float(det[14])
-            landmarks = det[4:14].reshape((5, 2)).astype(np.float32)
+            if scale != 1.0:
+                bbox = [
+                    int(round(det[0] / scale)),
+                    int(round(det[1] / scale)),
+                    int(round(det[2] / scale)),
+                    int(round(det[3] / scale)),
+                ]
+                landmarks = (det[4:14].reshape((5, 2)) / scale).astype(np.float32)
+            else:
+                bbox = [int(det[0]), int(det[1]), int(det[2]), int(det[3])]
+                landmarks = det[4:14].reshape((5, 2)).astype(np.float32)
 
+            score = float(det[14])
             results.append(FaceDetection(bbox=bbox, score=score, landmarks=landmarks))
 
         # Sort by confidence descending
