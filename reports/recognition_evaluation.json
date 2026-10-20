@@ -2,6 +2,7 @@
   "model": "face_recognition_sface_2021dec",
   "embedding_dimension": 128,
   "enrolled_gallery_size": 2981,
+  "enrolled_identities_count": 150,
   "closed_set_identification": {
     "total_test_queries": 624,
     "rank1_correct": 605,
@@ -9,6 +10,14 @@
     "top5_correct": 605,
     "top5_accuracy_percent": 96.9551282051282,
     "mrr": 0.969551282051282,
+    "rank_distribution": {
+      "1": 605,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "unranked": 19
+    },
     "per_identity": {
       "Abdullah_Gul": {
         "queries": 3,
@@ -612,16 +621,58 @@
       }
     }
   },
-  "open_set_rejection": {
+  "open_set_evaluation_pairwise_tau_0_300": {
     "decision_threshold_tau": 0.3,
-    "known_queries_total": 624,
-    "known_correctly_identified": 605,
-    "true_identification_rate_percent": 96.9551282051282,
-    "known_falsely_rejected": 19,
-    "unknown_queries_total": 200,
-    "unknown_correctly_rejected": 145,
-    "unknown_rejection_rate_percent": 72.5,
-    "unknown_false_accepts": 55,
-    "false_acceptance_rate_percent": 27.500000000000004
+    "known_probes": {
+      "total": 624,
+      "correctly_identified": 605,
+      "true_identification_rate_percent": 96.9551282051282,
+      "false_rejected": 1,
+      "false_rejection_rate_percent": 0.16025641025641024,
+      "misidentified_as_other_enrolled": 18,
+      "mean_score": 0.79490003357522
+    },
+    "real_unknown_human_probes": {
+      "total": 200,
+      "correctly_rejected": 6,
+      "unknown_rejection_rate_percent": 3.0,
+      "false_accepted_as_enrolled": 194,
+      "false_positive_identification_rate_percent": 97.0,
+      "mean_score": 0.37487185925245287
+    },
+    "synthetic_random_vector_simulation": {
+      "total": 200,
+      "correctly_rejected": 145,
+      "rejection_rate_percent": 72.5,
+      "false_accepted": 55,
+      "false_accept_rate_percent": 27.500000000000004
+    }
+  },
+  "open_set_evaluation_gallery_tau_0_445": {
+    "decision_threshold_tau": 0.445,
+    "known_probes": {
+      "total": 624,
+      "correctly_identified": 604,
+      "true_identification_rate_percent": 96.7948717948718,
+      "false_rejected": 16,
+      "false_rejection_rate_percent": 2.564102564102564,
+      "misidentified_as_other_enrolled": 4,
+      "mean_score": 0.79490003357522
+    },
+    "real_unknown_human_probes": {
+      "total": 200,
+      "correctly_rejected": 191,
+      "unknown_rejection_rate_percent": 95.5,
+      "false_accepted_as_enrolled": 9,
+      "false_positive_identification_rate_percent": 4.5,
+      "mean_score": 0.37487185925245287
+    },
+    "synthetic_random_vector_simulation": {
+      "total": 200,
+      "correctly_rejected": 200,
+      "rejection_rate_percent": 100.0,
+      "false_accepted": 0,
+      "false_accept_rate_percent": 0.0
+    }
   }
 }

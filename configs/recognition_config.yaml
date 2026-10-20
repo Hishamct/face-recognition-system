@@ -4,7 +4,9 @@ recognition:
   model_path: "models/face_recognition_sface_2021dec.onnx"
   embedding_dimension: 128
   metric: "cosine"
-  default_decision_threshold: 0.300 # empirical threshold calibrated on validation set (FAR <= 1%)
+  default_decision_threshold: 0.445 # 1:N open-set gallery search threshold (FPIR <= 5% on real unseen faces)
+  pairwise_verification_threshold: 0.300 # 1:1 pairwise verification threshold (FAR <= 1%)
+  gallery_search_threshold: 0.445 # 1:N open-set gallery search threshold (FPIR <= 5%)
   unknown_label: "Unknown"
   faiss_index_type: "IndexFlatIP"
   index_path: "data/database/faiss_index.bin"

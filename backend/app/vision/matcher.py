@@ -116,17 +116,75 @@ class FaceMatcher:
             })
         return results
 
+    def search_identities(
+        self,
+        query_embedding: np.ndarray,
+        top_k: int = 5,
+        candidate_pool: int = 100,
+    ) -> list[dict]:
+        """
+        Search the gallery and return ranked distinct IDENTITIES (not raw vector slots).
+        Aggregates multiple exemplars and prototype vectors per identity by taking the maximum similarity score.
+
+        Args:
+            query_embedding: (128,) or (1, 128) float32 query vector
+            top_k: Number of ranked unique identities to return
+            candidate_pool: Number of raw nearest neighbor vectors to inspect before grouping
+
+        Returns:
+            List of dicts: [
+                {"rank": 1, "identity": str, "score": float, "metadata": dict},
+                {"rank": 2, "identity": str, "score": float, "metadata": dict},
+                ...
+            ]
+        """
+        if self.ntotal == 0:
+            return []
+
+        k = min(candidate_pool, self.ntotal)
+        vec = query_embedding.reshape(1, self.dimension).astype(np.float32).copy()
+        faiss.normalize_L2(vec)
+
+        D, I = self.index.search(vec, k)
+
+        best_by_id: dict[str, dict] = {}
+        for score, idx in zip(D[0], I[0]):
+            if idx < 0 or idx >= len(self.identities):
+                continue
+            person = self.identities[idx]
+            sc = float(score)
+            if person not in best_by_id or sc > best_by_id[person]["score"]:
+                best_by_id[person] = {
+                    "identity": person,
+                    "score": sc,
+                    "metadata": self.metadata[idx],
+                }
+
+        sorted_ids = sorted(best_by_id.values(), key=lambda x: x["score"], reverse=True)
+
+        results = []
+        for rank, item in enumerate(sorted_ids[:top_k], start=1):
+            results.append({
+                "rank": rank,
+                "identity": item["identity"],
+                "score": item["score"],
+                "metadata": item["metadata"],
+            })
+        return results
+
     def identify(
         self,
         query_embedding: np.ndarray,
-        threshold: float = 0.36,
+        threshold: float = 0.30,
         unknown_label: str = "Unknown",
+        candidate_pool: int = 100,
     ) -> dict:
         """
         Perform 1:N closed/open-set face identification against gallery.
-        If top-1 match score >= threshold, returns matched identity; else returns 'Unknown'.
+        Aggregates candidate exemplars to identity level.
+        If top-1 identity match score >= threshold, returns matched identity; else returns 'Unknown'.
         """
-        matches = self.search(query_embedding, top_k=1)
+        matches = self.search_identities(query_embedding, top_k=1, candidate_pool=candidate_pool)
         if not matches:
             return {
                 "matched": False,

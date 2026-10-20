@@ -135,3 +135,28 @@ def test_matcher_save_and_load(tmp_path: Path):
     matches = m2.search(vec, top_k=1)
     assert matches[0]["identity"] == "David"
     assert np.isclose(matches[0]["score"], 1.0, atol=1e-5)
+
+
+def test_matcher_search_identities_aggregates_exemplars():
+    matcher = FaceMatcher(dimension=128)
+    v1 = np.random.randn(128).astype(np.float32)
+    v2 = v1 + np.random.randn(128).astype(np.float32) * 0.05
+    v3 = np.random.randn(128).astype(np.float32)
+    v1 /= np.linalg.norm(v1)
+    v2 /= np.linalg.norm(v2)
+    v3 /= np.linalg.norm(v3)
+
+    # Enroll 2 exemplars for Alice, 1 for Bob
+    matcher.add("Alice", v1)
+    matcher.add("Alice", v2)
+    matcher.add("Bob", v3)
+    assert matcher.ntotal == 3
+
+    # search_identities should return Alice once and Bob once
+    matches = matcher.search_identities(v1, top_k=2)
+    assert len(matches) == 2
+    assert matches[0]["identity"] == "Alice"
+    assert matches[1]["identity"] == "Bob"
+    assert matches[0]["rank"] == 1
+    assert matches[1]["rank"] == 2
+
