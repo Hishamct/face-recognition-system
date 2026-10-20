@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
 try:
-    from app.api.routes import detection, evaluation, identities, recognition, training
+    from app.api.routes import detection, evaluation, identities, recognition, training, video
 except ImportError:
-    from backend.app.api.routes import detection, evaluation, identities, recognition, training
+    from backend.app.api.routes import detection, evaluation, identities, recognition, training, video
 
 api_router = APIRouter()
 
@@ -12,3 +12,4 @@ api_router.include_router(recognition.router)
 api_router.include_router(identities.router)
 api_router.include_router(evaluation.router)
 api_router.include_router(training.router)
+api_router.include_router(video.router)

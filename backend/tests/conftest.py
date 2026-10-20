@@ -45,3 +45,7 @@ if "backend.app.vision.embedder" not in sys.modules:
 import app.vision.classifier
 if "backend.app.vision.classifier" not in sys.modules:
     sys.modules["backend.app.vision.classifier"] = app.vision.classifier
+
+import app.vision.video
+if "backend.app.vision.video" not in sys.modules:
+    sys.modules["backend.app.vision.video"] = app.vision.video

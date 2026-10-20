@@ -11,6 +11,7 @@ import type {
   TrainingRunsResponse,
   TrainingHistoryResponse,
   HealthResponse,
+  VideoSummaryResponse,
 } from '../types/api.types';
 
 // Axios instance configured to use Vite proxy or localhost directly
@@ -126,6 +127,32 @@ export const api = {
       params: runId !== undefined ? { run_id: runId } : {},
     });
     return res.data;
+  },
+
+  // Video Stream & Batch Video Processing (Phase 7)
+  uploadVideo: async (
+    file: File,
+    stride = 5,
+    confidenceThreshold = 0.5697,
+    maxFrames = 300
+  ): Promise<VideoSummaryResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<VideoSummaryResponse>('/video/upload', formData, {
+      params: {
+        stride,
+        confidence_threshold: confidenceThreshold,
+        max_frames: maxFrames,
+      },
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
+
+  getVideoWebSocketUrl: (): string => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // When running under Vite proxy or localhost, route to /api/v1/video/stream
+    return `${protocol}//${window.location.host}/api/v1/video/stream`;
   },
 };
 

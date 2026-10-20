@@ -203,3 +203,33 @@ export interface HealthResponse {
   version?: string;
   database?: string;
 }
+
+export interface VideoStreamFrameResponse {
+  success: boolean;
+  face_count: number;
+  faces: FaceRecognitionItem[];
+  inference_time_ms: number;
+  fps: number;
+  image_width?: number;
+  image_height?: number;
+  timestamp: number;
+  error?: string;
+}
+
+export interface VideoTimelineItem {
+  frame: number;
+  timestamp_seconds: number;
+  face_count: number;
+  identities: string[];
+}
+
+export interface VideoSummaryResponse {
+  success: boolean;
+  filename: string;
+  total_frames_processed: number;
+  duration_seconds: number;
+  average_fps: number;
+  average_latency_ms: number;
+  unique_identities_detected: string[];
+  timeline_sample: VideoTimelineItem[];
+}

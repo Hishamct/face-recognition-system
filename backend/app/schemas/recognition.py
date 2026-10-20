@@ -16,6 +16,7 @@ class FaceRecognitionItem(BaseModel):
     identity: str
     confidence: float
     status: str = Field(..., description="'RECOGNIZED' or 'UNKNOWN'")
+    is_known: bool = False
     threshold_used: float
     top_candidates: List[CandidateItem] = Field(default_factory=list)
 
