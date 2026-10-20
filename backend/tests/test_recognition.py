@@ -160,3 +160,50 @@ def test_matcher_search_identities_aggregates_exemplars():
     assert matches[0]["rank"] == 1
     assert matches[1]["rank"] == 2
 
+
+def test_tripartite_partition_outcomes_sum_to_total():
+    """
+    Verify that in open-set identification, the outcomes for known probes
+    (Correct ID + False Reject + Misidentified) strictly sum to total known probes,
+    and unknown probes (Correct Reject + False Accept) strictly sum to total unknown probes.
+    """
+    matcher = FaceMatcher(dimension=128)
+    v_alice = np.random.randn(128).astype(np.float32)
+    v_bob = np.random.randn(128).astype(np.float32)
+    v_alice /= np.linalg.norm(v_alice)
+    v_bob /= np.linalg.norm(v_bob)
+    matcher.add("Alice", v_alice)
+    matcher.add("Bob", v_bob)
+
+    # 3 known probes:
+    # 1. Exact Alice (should be correctly identified)
+    # 2. Perturbed Alice with low similarity (should be false reject)
+    # 3. Vector closer to Bob but true label is Alice (should be misidentified)
+    known_probes = [
+        (v_alice.copy(), "Alice"),
+        (np.random.randn(128).astype(np.float32) / 10.0, "Alice"),
+        (v_bob.copy(), "Alice"),
+    ]
+
+    correct_id = 0
+    false_reject = 0
+    misidentified = 0
+    tau = 0.50
+
+    for vec, true_label in known_probes:
+        res = matcher.identify(vec, threshold=tau)
+        if res["matched"]:
+            if res["identity"] == true_label:
+                correct_id += 1
+            else:
+                misidentified += 1
+        else:
+            false_reject += 1
+
+    # Exact tri-partite sum assertion
+    assert correct_id + false_reject + misidentified == len(known_probes)
+    assert correct_id == 1
+    assert false_reject == 1
+    assert misidentified == 1
+
+

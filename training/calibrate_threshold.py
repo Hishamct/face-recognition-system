@@ -199,8 +199,8 @@ def evaluate_gallery_level_validation(
         if img is None:
             continue
         vec = embedder.embed(img, normalize=True)
-        # Search top candidate identity
-        matches = matcher.search_identities(vec, top_k=1, candidate_pool=100)
+        # Search top candidate identity across full gallery
+        matches = matcher.search_identities(vec, top_k=1, candidate_pool=None)
         if matches:
             top = matches[0]
             known_max_scores.append(top["score"])
@@ -215,7 +215,7 @@ def evaluate_gallery_level_validation(
         if img is None:
             continue
         vec = embedder.embed(img, normalize=True)
-        matches = matcher.search_identities(vec, top_k=1, candidate_pool=100)
+        matches = matcher.search_identities(vec, top_k=1, candidate_pool=None)
         if matches:
             unknown_max_scores.append(matches[0]["score"])
 

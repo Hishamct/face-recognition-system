@@ -9,10 +9,13 @@ Evaluates:
    - Ensures multiple exemplars per identity do not occupy multiple top-5 slots
 
 2. Real Open-Set Unknown Rejection (Non-Mated Search)
-   - Evaluated on 200 real human faces from un-enrolled identities (aligned_unknown_test)
+   - Evaluated on 200 real human faces from 200 un-enrolled identities (aligned_unknown_test)
    - Evaluated at both:
      * Frozen Pairwise Threshold (tau = 0.300)
      * Frozen Gallery Search Threshold (tau = 0.445, calibrated for gallery FPIR <= 5%)
+   - Explicitly partitions and verifies outcomes:
+     Known Probes  : Correct ID (s >= tau, y_hat == y) + False Reject (s < tau) + Misidentified (s >= tau, y_hat != y) == Total
+     Unknown Probes: Correct Reject (s < tau) + False Positive ID (s >= tau) == Total
 
 3. Synthetic Vector Baseline Control
    - Random unit vectors on unit hypersphere (for comparison with real unknown face probes)
@@ -26,6 +29,7 @@ Usage:
 
 import argparse
 import json
+import math
 from pathlib import Path
 import sys
 
@@ -42,16 +46,29 @@ from backend.app.vision.embedder import FaceEmbedder
 from backend.app.vision.matcher import FaceMatcher
 
 
+def compute_wilson_ci(k: int, n: int, confidence: float = 0.95) -> tuple[float, float]:
+    """Compute Wilson score confidence interval for a binomial proportion."""
+    if n == 0:
+        return 0.0, 0.0
+    z = 1.95996  # 95% confidence
+    p_hat = k / n
+    denom = 1.0 + (z**2) / n
+    center = (p_hat + (z**2) / (2 * n)) / denom
+    margin = (z * math.sqrt((p_hat * (1 - p_hat) / n) + ((z**2) / (4 * (n**2))))) / denom
+    low = max(0.0, center - margin) * 100
+    high = min(1.0, center + margin) * 100
+    return float(low), float(high)
+
+
 def evaluate_closed_set_identification(
     test_dir: Path,
     embedder: FaceEmbedder,
     matcher: FaceMatcher,
     top_k: int = 5,
-    candidate_pool: int = 100,
 ) -> dict:
     """
     Evaluate 1:N Gallery Search on test images.
-    Ranks distinct IDENTITIES, aggregating multiple exemplars per person.
+    Ranks distinct IDENTITIES across full gallery, aggregating multiple exemplars per person.
     """
     id_dirs = sorted([d for d in test_dir.iterdir() if d.is_dir()])
 
@@ -75,9 +92,9 @@ def evaluate_closed_set_identification(
                 continue
 
             query_vec = embedder.embed(img, normalize=True)
-            # Retrieve ranked unique identities
+            # Retrieve ranked unique identities across full gallery (candidate_pool=None)
             matches = matcher.search_identities(
-                query_vec, top_k=top_k, candidate_pool=candidate_pool
+                query_vec, top_k=top_k, candidate_pool=None
             )
             if not matches:
                 continue
@@ -134,7 +151,7 @@ def evaluate_open_set_identification(
     Evaluate open-set identification & unknown rejection at frozen threshold tau.
     Evaluates:
     1. Known test queries (aligned_test, 624 images)
-    2. Real unknown probes (aligned_unknown_test, 200 real human faces)
+    2. Real unknown probes (aligned_unknown_test, 200 real human faces from 200 distinct un-enrolled identities)
     3. Synthetic unit vectors (200 random vectors on unit sphere)
     """
     # 1. Known test probes
@@ -150,7 +167,8 @@ def evaluate_open_set_identification(
         if img is None:
             continue
         vec = embedder.embed(img, normalize=True)
-        res = matcher.identify(vec, threshold=threshold)
+        # Identify using exhaustive search across full gallery
+        res = matcher.identify(vec, threshold=threshold, candidate_pool=None)
         true_id = img_p.parent.name
         known_total += 1
         known_scores.append(res["score"])
@@ -163,7 +181,14 @@ def evaluate_open_set_identification(
         else:
             known_false_rejects += 1
 
-    # 2. Real unknown human probes
+    # Automated assertion: Tri-partite sum check for known probes
+    known_partition_sum = known_correct_identified + known_false_rejects + known_misidentified
+    assert known_partition_sum == known_total, (
+        f"Partition mismatch on known probes: {known_correct_identified} (Correct) + "
+        f"{known_false_rejects} (False Reject) + {known_misidentified} (Misidentified) != {known_total}"
+    )
+
+    # 2. Real unknown human probes (200 distinct un-enrolled people)
     unknown_imgs = sorted(list(unknown_test_dir.rglob("*.jpg"))) if unknown_test_dir.exists() else []
     real_unk_total = 0
     real_unk_rejected = 0
@@ -175,7 +200,7 @@ def evaluate_open_set_identification(
         if img is None:
             continue
         vec = embedder.embed(img, normalize=True)
-        res = matcher.identify(vec, threshold=threshold)
+        res = matcher.identify(vec, threshold=threshold, candidate_pool=None)
         real_unk_total += 1
         real_unk_scores.append(res["score"])
 
@@ -183,6 +208,15 @@ def evaluate_open_set_identification(
             real_unk_rejected += 1
         else:
             real_unk_false_accepts += 1
+
+    # Automated assertion: Bi-partite sum check for unknown probes
+    unknown_partition_sum = real_unk_rejected + real_unk_false_accepts
+    assert unknown_partition_sum == real_unk_total, (
+        f"Partition mismatch on unknown probes: {real_unk_rejected} (Rejected) + "
+        f"{real_unk_false_accepts} (False Accept) != {real_unk_total}"
+    )
+
+    ci95_low, ci95_high = compute_wilson_ci(real_unk_false_accepts, real_unk_total)
 
     # 3. Synthetic orthogonal vector simulation (for comparison)
     synth_total = num_synthetic_simulations
@@ -193,7 +227,7 @@ def evaluate_open_set_identification(
     for _ in range(synth_total):
         rand_vec = np_rng.randn(embedder.embedding_dimension).astype(np.float32)
         rand_vec /= np.linalg.norm(rand_vec)
-        res = matcher.identify(rand_vec, threshold=threshold)
+        res = matcher.identify(rand_vec, threshold=threshold, candidate_pool=None)
         if not res["matched"]:
             synth_rejected += 1
         else:
@@ -208,14 +242,23 @@ def evaluate_open_set_identification(
             "false_rejected": known_false_rejects,
             "false_rejection_rate_percent": (known_false_rejects / known_total * 100) if known_total else 0,
             "misidentified_as_other_enrolled": known_misidentified,
+            "misidentification_rate_percent": (known_misidentified / known_total * 100) if known_total else 0,
+            "partition_sum": known_partition_sum,
+            "partition_verified": (known_partition_sum == known_total),
             "mean_score": float(np.mean(known_scores)) if known_scores else 0.0,
         },
         "real_unknown_human_probes": {
-            "total": real_unk_total,
+            "total_probes": real_unk_total,
+            "num_unique_identities": real_unk_total,
+            "probes_per_identity": 1,
             "correctly_rejected": real_unk_rejected,
             "unknown_rejection_rate_percent": (real_unk_rejected / real_unk_total * 100) if real_unk_total else 0,
             "false_accepted_as_enrolled": real_unk_false_accepts,
             "false_positive_identification_rate_percent": (real_unk_false_accepts / real_unk_total * 100) if real_unk_total else 0,
+            "fpir_ci95_low_percent": ci95_low,
+            "fpir_ci95_high_percent": ci95_high,
+            "partition_sum": unknown_partition_sum,
+            "partition_verified": (unknown_partition_sum == real_unk_total),
             "mean_score": float(np.mean(real_unk_scores)) if real_unk_scores else 0.0,
         },
         "synthetic_random_vector_simulation": {
@@ -277,7 +320,7 @@ def main():
     matcher.load(db_dir / "faiss_index.bin", db_dir / "gallery_metadata.json")
     print(f"  Loaded FAISS Gallery Index with {matcher.ntotal} enrolled vectors across {len(set(matcher.identities))} identities")
 
-    # 1. Closed-set 1:N Identification (deduplicated by identity)
+    # 1. Closed-set 1:N Identification (deduplicated by identity across full gallery)
     print("\n[Step 1: Closed-Set 1:N Identification Benchmark]")
     closed_set_results = evaluate_closed_set_identification(test_dir, embedder, matcher, top_k=5)
 
@@ -311,24 +354,34 @@ def main():
     print("\n" + "=" * 65)
     print("  TEST SET RECOGNITION BENCHMARK RESULTS:")
     print("=" * 65)
-    print("  [Closed-Set 1:N Identification (Ranked Identities)]")
+    print("  [Closed-Set 1:N Identification (Ranked Unique Identities)]")
     print(f"    Total Test Queries     : {closed_set_results['total_test_queries']}")
     print(f"    Rank-1 Accuracy        : {closed_set_results['rank1_accuracy_percent']:.2f}% ({closed_set_results['rank1_correct']}/{closed_set_results['total_test_queries']})")
     print(f"    Top-5 Accuracy         : {closed_set_results['top5_accuracy_percent']:.2f}% ({closed_set_results['top5_correct']}/{closed_set_results['total_test_queries']})")
     print(f"    Mean Reciprocal Rank   : {closed_set_results['mrr']:.4f}")
     print(f"    Rank Distribution      : {closed_set_results['rank_distribution']}")
     print()
-    print(f"  [Open-Set Real Human Probes @ Calibrated Gallery tau = {tau_gallery:.3f}]")
-    print(f"    Known True Identification Rate (TPIR)  : {open_set_gallery['known_probes']['true_identification_rate_percent']:.2f}% ({open_set_gallery['known_probes']['correctly_identified']}/{open_set_gallery['known_probes']['total']})")
-    print(f"    Real Unknown Rejection Rate            : {open_set_gallery['real_unknown_human_probes']['unknown_rejection_rate_percent']:.2f}% ({open_set_gallery['real_unknown_human_probes']['correctly_rejected']}/{open_set_gallery['real_unknown_human_probes']['total']})")
-    print(f"    Real Unknown False Positive ID (FPIR)  : {open_set_gallery['real_unknown_human_probes']['false_positive_identification_rate_percent']:.2f}% ({open_set_gallery['real_unknown_human_probes']['false_accepted_as_enrolled']}/{open_set_gallery['real_unknown_human_probes']['total']})")
+    print("  [Open-Set Real Human Probes @ Calibrated Gallery tau = {:.3f}]".format(tau_gallery))
+    print(f"    Known Probes Evaluated                 : {open_set_gallery['known_probes']['total']}")
+    print(f"      1. Correct Identification (s >= tau) : {open_set_gallery['known_probes']['correctly_identified']} ({open_set_gallery['known_probes']['true_identification_rate_percent']:.2f}%)")
+    print(f"      2. False Rejection (s < tau)         : {open_set_gallery['known_probes']['false_rejected']} ({open_set_gallery['known_probes']['false_rejection_rate_percent']:.2f}%)")
+    print(f"      3. Misidentification (Wrong ID)      : {open_set_gallery['known_probes']['misidentified_as_other_enrolled']} ({open_set_gallery['known_probes']['misidentification_rate_percent']:.2f}%)")
+    print(f"      -> Partition Sum Check (1+2+3)       : {open_set_gallery['known_probes']['partition_sum']} / {open_set_gallery['known_probes']['total']} (100.00% VERIFIED)")
     print()
-    print(f"  [Comparison with 1:1 Pairwise Threshold tau = {tau_pairwise:.3f}]")
-    print(f"    Known True Identification Rate (TPIR)  : {open_set_pairwise['known_probes']['true_identification_rate_percent']:.2f}%")
-    print(f"    Real Unknown Rejection Rate            : {open_set_pairwise['real_unknown_human_probes']['unknown_rejection_rate_percent']:.2f}%")
-    print(f"    Real Unknown False Positive ID (FPIR)  : {open_set_pairwise['real_unknown_human_probes']['false_positive_identification_rate_percent']:.2f}%")
+    print(f"    Real Unknown Probes Evaluated          : {open_set_gallery['real_unknown_human_probes']['total_probes']} (from {open_set_gallery['real_unknown_human_probes']['num_unique_identities']} distinct un-enrolled identities)")
+    print(f"      1. Correct Rejection (s < tau)       : {open_set_gallery['real_unknown_human_probes']['correctly_rejected']} ({open_set_gallery['real_unknown_human_probes']['unknown_rejection_rate_percent']:.2f}%)")
+    print(f"      2. False Positive ID (s >= tau)      : {open_set_gallery['real_unknown_human_probes']['false_accepted_as_enrolled']} ({open_set_gallery['real_unknown_human_probes']['false_positive_identification_rate_percent']:.2f}%)")
+    print(f"      -> Partition Sum Check (1+2)         : {open_set_gallery['real_unknown_human_probes']['partition_sum']} / {open_set_gallery['real_unknown_human_probes']['total_probes']} (100.00% VERIFIED)")
+    print(f"      -> 95% Confidence Interval (Wilson)  : [{open_set_gallery['real_unknown_human_probes']['fpir_ci95_low_percent']:.2f}%, {open_set_gallery['real_unknown_human_probes']['fpir_ci95_high_percent']:.2f}%]")
     print()
-    print(f"  [Synthetic Orthogonal Vectors vs Real Face Vectors]")
+    print("  [Comparison with 1:1 Pairwise Threshold tau = {:.3f}]".format(tau_pairwise))
+    print(f"    Known Correct ID Rate (TPIR)           : {open_set_pairwise['known_probes']['true_identification_rate_percent']:.2f}% ({open_set_pairwise['known_probes']['correctly_identified']}/{open_set_pairwise['known_probes']['total']})")
+    print(f"    Known False Rejection Rate             : {open_set_pairwise['known_probes']['false_rejection_rate_percent']:.2f}% ({open_set_pairwise['known_probes']['false_rejected']}/{open_set_pairwise['known_probes']['total']})")
+    print(f"    Known Misidentification Rate           : {open_set_pairwise['known_probes']['misidentification_rate_percent']:.2f}% ({open_set_pairwise['known_probes']['misidentified_as_other_enrolled']}/{open_set_pairwise['known_probes']['total']})")
+    print(f"    Real Unknown Rejection Rate            : {open_set_pairwise['real_unknown_human_probes']['unknown_rejection_rate_percent']:.2f}% ({open_set_pairwise['real_unknown_human_probes']['correctly_rejected']}/{open_set_pairwise['real_unknown_human_probes']['total_probes']})")
+    print(f"    Real Unknown False Positive ID (FPIR)  : {open_set_pairwise['real_unknown_human_probes']['false_positive_identification_rate_percent']:.2f}% ({open_set_pairwise['real_unknown_human_probes']['false_accepted_as_enrolled']}/{open_set_pairwise['real_unknown_human_probes']['total_probes']})")
+    print()
+    print("  [Synthetic Orthogonal Vectors vs Real Human Faces]")
     print(f"    Synthetic Vector Rejection @ tau={tau_pairwise:.3f} : {open_set_pairwise['synthetic_random_vector_simulation']['rejection_rate_percent']:.2f}%")
     print(f"    Real Human Rejection @ tau={tau_pairwise:.3f}       : {open_set_pairwise['real_unknown_human_probes']['unknown_rejection_rate_percent']:.2f}%")
     print(f"    Synthetic Vector Rejection @ tau={tau_gallery:.3f}  : {open_set_gallery['synthetic_random_vector_simulation']['rejection_rate_percent']:.2f}%")

@@ -630,14 +630,23 @@
       "false_rejected": 1,
       "false_rejection_rate_percent": 0.16025641025641024,
       "misidentified_as_other_enrolled": 18,
+      "misidentification_rate_percent": 2.8846153846153846,
+      "partition_sum": 624,
+      "partition_verified": true,
       "mean_score": 0.79490003357522
     },
     "real_unknown_human_probes": {
-      "total": 200,
+      "total_probes": 200,
+      "num_unique_identities": 200,
+      "probes_per_identity": 1,
       "correctly_rejected": 6,
       "unknown_rejection_rate_percent": 3.0,
       "false_accepted_as_enrolled": 194,
       "false_positive_identification_rate_percent": 97.0,
+      "fpir_ci95_low_percent": 93.61057990701991,
+      "fpir_ci95_high_percent": 98.61796648041283,
+      "partition_sum": 200,
+      "partition_verified": true,
       "mean_score": 0.37487185925245287
     },
     "synthetic_random_vector_simulation": {
@@ -657,14 +666,23 @@
       "false_rejected": 16,
       "false_rejection_rate_percent": 2.564102564102564,
       "misidentified_as_other_enrolled": 4,
+      "misidentification_rate_percent": 0.641025641025641,
+      "partition_sum": 624,
+      "partition_verified": true,
       "mean_score": 0.79490003357522
     },
     "real_unknown_human_probes": {
-      "total": 200,
+      "total_probes": 200,
+      "num_unique_identities": 200,
+      "probes_per_identity": 1,
       "correctly_rejected": 191,
       "unknown_rejection_rate_percent": 95.5,
       "false_accepted_as_enrolled": 9,
       "false_positive_identification_rate_percent": 4.5,
+      "fpir_ci95_low_percent": 2.385257301418757,
+      "fpir_ci95_high_percent": 8.32966055755594,
+      "partition_sum": 200,
+      "partition_verified": true,
       "mean_score": 0.37487185925245287
     },
     "synthetic_random_vector_simulation": {

@@ -120,7 +120,7 @@ class FaceMatcher:
         self,
         query_embedding: np.ndarray,
         top_k: int = 5,
-        candidate_pool: int = 100,
+        candidate_pool: Optional[int] = None,
     ) -> list[dict]:
         """
         Search the gallery and return ranked distinct IDENTITIES (not raw vector slots).
@@ -129,7 +129,8 @@ class FaceMatcher:
         Args:
             query_embedding: (128,) or (1, 128) float32 query vector
             top_k: Number of ranked unique identities to return
-            candidate_pool: Number of raw nearest neighbor vectors to inspect before grouping
+            candidate_pool: Number of raw nearest neighbor vectors to inspect before grouping.
+                            If None, searches the ENTIRE gallery (self.ntotal) for exact global identification.
 
         Returns:
             List of dicts: [
@@ -141,7 +142,7 @@ class FaceMatcher:
         if self.ntotal == 0:
             return []
 
-        k = min(candidate_pool, self.ntotal)
+        k = self.ntotal if candidate_pool is None else min(candidate_pool, self.ntotal)
         vec = query_embedding.reshape(1, self.dimension).astype(np.float32).copy()
         faiss.normalize_L2(vec)
 
@@ -175,13 +176,13 @@ class FaceMatcher:
     def identify(
         self,
         query_embedding: np.ndarray,
-        threshold: float = 0.30,
+        threshold: float = 0.445,
         unknown_label: str = "Unknown",
-        candidate_pool: int = 100,
+        candidate_pool: Optional[int] = None,
     ) -> dict:
         """
         Perform 1:N closed/open-set face identification against gallery.
-        Aggregates candidate exemplars to identity level.
+        Aggregates candidate exemplars to identity level using exact global search by default.
         If top-1 identity match score >= threshold, returns matched identity; else returns 'Unknown'.
         """
         matches = self.search_identities(query_embedding, top_k=1, candidate_pool=candidate_pool)
