@@ -1,0 +1,627 @@
+{
+  "model": "face_recognition_sface_2021dec",
+  "embedding_dimension": 128,
+  "enrolled_gallery_size": 2981,
+  "closed_set_identification": {
+    "total_test_queries": 624,
+    "rank1_correct": 605,
+    "rank1_accuracy_percent": 96.9551282051282,
+    "top5_correct": 605,
+    "top5_accuracy_percent": 96.9551282051282,
+    "mrr": 0.969551282051282,
+    "per_identity": {
+      "Abdullah_Gul": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Adrien_Brody": {
+        "queries": 2,
+        "rank1_accuracy": 0.5
+      },
+      "Alejandro_Toledo": {
+        "queries": 6,
+        "rank1_accuracy": 1.0
+      },
+      "Alvaro_Uribe": {
+        "queries": 5,
+        "rank1_accuracy": 0.8
+      },
+      "Amelie_Mauresmo": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Andre_Agassi": {
+        "queries": 5,
+        "rank1_accuracy": 1.0
+      },
+      "Andy_Roddick": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Angelina_Jolie": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Ann_Veneman": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Anna_Kournikova": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Ari_Fleischer": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Ariel_Sharon": {
+        "queries": 11,
+        "rank1_accuracy": 1.0
+      },
+      "Arnold_Schwarzenegger": {
+        "queries": 6,
+        "rank1_accuracy": 1.0
+      },
+      "Atal_Bihari_Vajpayee": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Bill_Clinton": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Bill_Gates": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Bill_McBride": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Bill_Simon": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Britney_Spears": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Carlos_Menem": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Carlos_Moya": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Charles_Moose": {
+        "queries": 2,
+        "rank1_accuracy": 0.5
+      },
+      "Colin_Powell": {
+        "queries": 35,
+        "rank1_accuracy": 1.0
+      },
+      "Condoleezza_Rice": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "David_Beckham": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "David_Nalbandian": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Dick_Cheney": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Dominique_de_Villepin": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Donald_Rumsfeld": {
+        "queries": 17,
+        "rank1_accuracy": 1.0
+      },
+      "Edmund_Stoiber": {
+        "queries": 2,
+        "rank1_accuracy": 0.5
+      },
+      "Eduardo_Duhalde": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Fidel_Castro": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "George_HW_Bush": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "George_Robertson": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "George_W_Bush": {
+        "queries": 78,
+        "rank1_accuracy": 0.9358974358974359
+      },
+      "Gerhard_Schroeder": {
+        "queries": 16,
+        "rank1_accuracy": 1.0
+      },
+      "Gloria_Macapagal_Arroyo": {
+        "queries": 6,
+        "rank1_accuracy": 1.0
+      },
+      "Gonzalo_Sanchez_de_Lozada": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Gordon_Brown": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Gray_Davis": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Guillermo_Coria": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Halle_Berry": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Hamid_Karzai": {
+        "queries": 3,
+        "rank1_accuracy": 0.6666666666666666
+      },
+      "Hans_Blix": {
+        "queries": 6,
+        "rank1_accuracy": 1.0
+      },
+      "Harrison_Ford": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Hillary_Clinton": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Howard_Dean": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Hu_Jintao": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Hugo_Chavez": {
+        "queries": 10,
+        "rank1_accuracy": 0.9
+      },
+      "Ian_Thorpe": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Igor_Ivanov": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Jack_Straw": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Jackie_Chan": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Jacques_Chirac": {
+        "queries": 8,
+        "rank1_accuracy": 1.0
+      },
+      "Jacques_Rogge": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "James_Blake": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "James_Kelly": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Jason_Kidd": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Javier_Solana": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Jean-David_Levitte": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Jean_Charest": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Jean_Chretien": {
+        "queries": 8,
+        "rank1_accuracy": 1.0
+      },
+      "Jeb_Bush": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Jennifer_Aniston": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Jennifer_Capriati": {
+        "queries": 6,
+        "rank1_accuracy": 1.0
+      },
+      "Jennifer_Garner": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Jennifer_Lopez": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Jeremy_Greenstock": {
+        "queries": 4,
+        "rank1_accuracy": 0.75
+      },
+      "Jiang_Zemin": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Jiri_Novak": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Joe_Lieberman": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "John_Ashcroft": {
+        "queries": 7,
+        "rank1_accuracy": 1.0
+      },
+      "John_Bolton": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "John_Howard": {
+        "queries": 3,
+        "rank1_accuracy": 0.6666666666666666
+      },
+      "John_Kerry": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "John_Negroponte": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "John_Snow": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Joschka_Fischer": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Jose_Maria_Aznar": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Juan_Carlos_Ferrero": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Julianne_Moore": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Julie_Gerberding": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Junichiro_Koizumi": {
+        "queries": 8,
+        "rank1_accuracy": 1.0
+      },
+      "Kim_Clijsters": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Kim_Ryong-sung": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Kofi_Annan": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Lance_Armstrong": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Laura_Bush": {
+        "queries": 5,
+        "rank1_accuracy": 1.0
+      },
+      "Lindsay_Davenport": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Lleyton_Hewitt": {
+        "queries": 6,
+        "rank1_accuracy": 1.0
+      },
+      "Lucio_Gutierrez": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Luiz_Inacio_Lula_da_Silva": {
+        "queries": 7,
+        "rank1_accuracy": 1.0
+      },
+      "Mahathir_Mohamad": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Mahmoud_Abbas": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Mark_Philippoussis": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Megawati_Sukarnoputri": {
+        "queries": 5,
+        "rank1_accuracy": 1.0
+      },
+      "Meryl_Streep": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Michael_Bloomberg": {
+        "queries": 3,
+        "rank1_accuracy": 0.6666666666666666
+      },
+      "Michael_Schumacher": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Mike_Weir": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Mohammad_Khatami": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Mohammed_Al-Douri": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Muhammad_Ali": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Nancy_Pelosi": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Naomi_Watts": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Nestor_Kirchner": {
+        "queries": 5,
+        "rank1_accuracy": 0.8
+      },
+      "Nicanor_Duarte_Frutos": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Nicole_Kidman": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Norah_Jones": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Paradorn_Srichaphan": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Paul_Bremer": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Paul_Burrell": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Paul_Wolfowitz": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Pervez_Musharraf": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Pete_Sampras": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Pierce_Brosnan": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Queen_Elizabeth_II": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Recep_Tayyip_Erdogan": {
+        "queries": 4,
+        "rank1_accuracy": 0.75
+      },
+      "Renee_Zellweger": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Ricardo_Lagos": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Richard_Gephardt": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Richard_Gere": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Richard_Myers": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Roger_Federer": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Roh_Moo-hyun": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Rubens_Barrichello": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Rudolph_Giuliani": {
+        "queries": 4,
+        "rank1_accuracy": 0.75
+      },
+      "Saddam_Hussein": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Salma_Hayek": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Serena_Williams": {
+        "queries": 8,
+        "rank1_accuracy": 1.0
+      },
+      "Sergey_Lavrov": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Sergio_Vieira_De_Mello": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Silvio_Berlusconi": {
+        "queries": 5,
+        "rank1_accuracy": 1.0
+      },
+      "Spencer_Abraham": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Taha_Yassin_Ramadan": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Tang_Jiaxuan": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Tiger_Woods": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Tim_Henman": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Tom_Daschle": {
+        "queries": 4,
+        "rank1_accuracy": 1.0
+      },
+      "Tom_Ridge": {
+        "queries": 5,
+        "rank1_accuracy": 0.8
+      },
+      "Tommy_Franks": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Tony_Blair": {
+        "queries": 21,
+        "rank1_accuracy": 1.0
+      },
+      "Trent_Lott": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Venus_Williams": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Vicente_Fox": {
+        "queries": 5,
+        "rank1_accuracy": 0.8
+      },
+      "Vladimir_Putin": {
+        "queries": 7,
+        "rank1_accuracy": 1.0
+      },
+      "Walter_Mondale": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Wen_Jiabao": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      },
+      "Winona_Ryder": {
+        "queries": 3,
+        "rank1_accuracy": 1.0
+      },
+      "Yoriko_Kawaguchi": {
+        "queries": 2,
+        "rank1_accuracy": 1.0
+      }
+    }
+  },
+  "open_set_rejection": {
+    "decision_threshold_tau": 0.3,
+    "known_queries_total": 624,
+    "known_correctly_identified": 605,
+    "true_identification_rate_percent": 96.9551282051282,
+    "known_falsely_rejected": 19,
+    "unknown_queries_total": 200,
+    "unknown_correctly_rejected": 145,
+    "unknown_rejection_rate_percent": 72.5,
+    "unknown_false_accepts": 55,
+    "false_acceptance_rate_percent": 27.500000000000004
+  }
+}

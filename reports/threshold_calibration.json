@@ -1,0 +1,18 @@
+{
+  "dataset_split": "aligned_val",
+  "num_identities_evaluated": 150,
+  "num_genuine_pairs": 4772,
+  "num_impostor_pairs": 5000,
+  "genuine_mean": 0.6331077814102173,
+  "genuine_std": 0.1946837455034256,
+  "impostor_mean": 0.0917472317814827,
+  "impostor_std": 0.08776766806840897,
+  "eer_threshold": 0.215,
+  "eer_value_percent": 7.992036881810562,
+  "max_acc_threshold": 0.34,
+  "max_accuracy_percent": 95.42598491198659,
+  "operational_threshold_far1pct": 0.3,
+  "operational_far_percent": 0.86,
+  "operational_frr_percent": 8.822296730930427,
+  "roc_auc": 0.9515814333612742
+}
