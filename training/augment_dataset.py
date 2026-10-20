@@ -1,27 +1,31 @@
 """
 training/augment_dataset.py
 ============================
-Phase 1 - Step 4: Define the Albumentations augmentation pipeline and
-generate visual preview images showing each transform applied to a sample.
+Phase 1 - Step 4: Albumentations augmentation pipeline definition and
+preview generator with identity-preserving, moderated parameters.
 
-This script does NOT bake augmented images into disk.
-Augmentation is applied at runtime inside the PyTorch DataLoader (Phase 4).
-
-Usage:
-    python training/augment_dataset.py [--n-samples 5] [--preview-dir reports/augmentation_preview]
+CRITICAL DESIGN RULES:
+1. Augmentation is applied ONLY to training data at runtime (in PyTorch DataLoader, Phase 4).
+2. Validation (val/) and test (test/) splits are NEVER augmented.
+3. Transformed images are NEVER saved into the training dataset folder (no disk pollution).
+4. Parameters are conservative so key facial landmarks (eyes, nose, mouth) remain intact.
 
 Output:
     reports/augmentation_preview/
-        original/     - original sample images
-        flipped/      - HorizontalFlip
-        brightness/   - RandomBrightnessContrast
-        blur/         - MotionBlur
-        noise/        - GaussNoise
-        rotated/      - Rotate
-        dropout/      - CoarseDropout
-        hsv/          - HueSaturationValue
-        clahe/        - CLAHE
-        combined/     - full pipeline (all transforms at once)
+        original/     - Untransformed reference samples (1 folder)
+        flipped/      - HorizontalFlip (1 transform)
+        brightness/   - RandomBrightnessContrast (1 transform)
+        blur/         - MotionBlur (1 transform)
+        noise/        - GaussNoise (1 transform)
+        rotated/      - Rotate (1 transform)
+        dropout/      - CoarseDropout (1 transform)
+        hsv/          - HueSaturationValue (1 transform)
+        clahe/        - CLAHE (1 transform)
+        combined/     - Full runtime pipeline (all transforms combined) (1 folder)
+        Total: 10 directories (8 individual transforms + 1 original + 1 combined)
+
+Usage:
+    python training/augment_dataset.py [--n-samples 5] [--preview-dir reports/augmentation_preview]
 """
 
 import argparse
@@ -44,56 +48,75 @@ except ImportError:
 
 def get_full_pipeline() -> A.Compose:
     """
-    The complete training augmentation pipeline.
-    This is the SAME pipeline that will be used inside the Phase 4 DataLoader.
+    The complete training augmentation pipeline for Phase 4 DataLoader.
+    All transformations use conservative bounds to preserve facial identity.
     """
     return A.Compose([
+        # Horizontal flip: Natural mirror pose variation
         A.HorizontalFlip(p=0.5),
-        A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
-        A.MotionBlur(blur_limit=7, p=0.2),
-        A.GaussNoise(p=0.3),
-        A.Rotate(limit=15, p=0.4),
+
+        # Lighting / ambient exposure variation
+        A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.4),
+
+        # Subtle sensor motion blur (kept low to avoid unrecoverable feature erasure)
+        A.MotionBlur(blur_limit=5, p=0.15),
+
+        # Mild camera sensor noise
+        A.GaussNoise(std_range=(0.05, 0.15), p=0.2),
+
+        # Slight head tilt (+/- 10 degrees max; alignment in Phase 2 normalizes roll)
+        A.Rotate(limit=10, p=0.3),
+
+        # Mild occlusion (sunglasses rim, mask edge) - small holes so landmarks aren't erased
         A.CoarseDropout(
-            num_holes_range=(1, 3),
-            hole_height_range=(0.05, 0.15),
-            hole_width_range=(0.05, 0.15),
+            num_holes_range=(1, 2),
+            hole_height_range=(0.03, 0.08),
+            hole_width_range=(0.03, 0.08),
             fill=0,
-            p=0.3,
+            p=0.2,
         ),
-        A.HueSaturationValue(hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.3),
-        A.CLAHE(clip_limit=4.0, p=0.2),
+
+        # Conservative color shifts (skin tone stability)
+        A.HueSaturationValue(hue_shift_limit=10, sat_shift_limit=20, val_shift_limit=15, p=0.25),
+
+        # Contrast-limited adaptive histogram equalization (enhances local contrast gently)
+        A.CLAHE(clip_limit=2.0, tile_grid_size=(8, 8), p=0.15),
     ])
 
 
 def get_individual_transforms() -> dict:
     """
     Returns named individual transforms for preview generation.
-    Each is applied at p=1.0 so the preview definitely shows the effect.
+    Each transform is isolated at p=1.0 so that the visual effect can be clearly audited.
     """
     return {
         "flipped":    A.HorizontalFlip(p=1.0),
-        "brightness": A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, p=1.0),
-        "blur":       A.MotionBlur(blur_limit=11, p=1.0),
-        "noise":      A.GaussNoise(p=1.0),
-        "rotated":    A.Rotate(limit=20, p=1.0),
+        "brightness": A.RandomBrightnessContrast(brightness_limit=0.25, contrast_limit=0.25, p=1.0),
+        "blur":       A.MotionBlur(blur_limit=5, p=1.0),
+        "noise":      A.GaussNoise(std_range=(0.1, 0.2), p=1.0),
+        "rotated":    A.Rotate(limit=10, p=1.0),
         "dropout":    A.CoarseDropout(
-                          num_holes_range=(2, 4),
-                          hole_height_range=(0.1, 0.2),
-                          hole_width_range=(0.1, 0.2),
+                          num_holes_range=(2, 3),
+                          hole_height_range=(0.04, 0.08),
+                          hole_width_range=(0.04, 0.08),
                           fill=0,
                           p=1.0,
                       ),
-        "hsv":        A.HueSaturationValue(hue_shift_limit=30, sat_shift_limit=40, val_shift_limit=30, p=1.0),
-        "clahe":      A.CLAHE(clip_limit=6.0, tile_grid_size=(8, 8), p=1.0),
+        "hsv":        A.HueSaturationValue(hue_shift_limit=15, sat_shift_limit=25, val_shift_limit=20, p=1.0),
+        "clahe":      A.CLAHE(clip_limit=2.5, tile_grid_size=(8, 8), p=1.0),
     }
 
 
 # --- Helpers -----------------------------------------------------------------
 
 def load_sample_images(train_dir: Path, n: int, seed: int = 42) -> list:
-    """Load n sample images from the training split, one per identity."""
+    """
+    Load n sample images exclusively from the training split.
+    Asserts that sample images originate only from data/processed/train.
+    """
+    assert "train" in str(train_dir).lower(), "Safety assertion: Samples must come ONLY from train split!"
     random.seed(seed)
-    all_images = list(train_dir.rglob("*.jpg"))
+    all_images = sorted(list(train_dir.rglob("*.jpg")))
     if not all_images:
         return []
 
@@ -121,16 +144,21 @@ def generate_previews(
     individual_transforms: dict,
 ) -> None:
     """Generate and save preview images for all transforms."""
+    import shutil
+    if preview_dir.exists():
+        shutil.rmtree(preview_dir)
+    preview_dir.mkdir(parents=True, exist_ok=True)
+
     print(f"\nGenerating augmentation previews -> {preview_dir}")
-    print(f"  Samples: {len(samples)}")
+    print(f"  Samples: {len(samples)} (drawn exclusively from data/processed/train/)")
 
     for i, (identity, img_rgb) in enumerate(samples):
         filename = f"sample_{i+1:02d}_{identity}.jpg"
 
-        # Save original
+        # 1. Reference folder: original unaugmented image
         save_preview(img_rgb, preview_dir / "original", filename)
 
-        # Save individual transforms
+        # 2-9. Individual transform folders (8 distinct transforms)
         for transform_name, transform in individual_transforms.items():
             try:
                 result = transform(image=img_rgb)
@@ -138,7 +166,7 @@ def generate_previews(
             except Exception as e:
                 print(f"  [warn] {transform_name} failed on sample {i+1}: {e}")
 
-        # Save combined full pipeline
+        # 10. Combined pipeline folder (full composed pipeline)
         try:
             result = full_pipeline(image=img_rgb)
             save_preview(result["image"], preview_dir / "combined", filename)
@@ -150,7 +178,7 @@ def generate_previews(
     print(f"  [OK] {len(all_previews)} preview images saved to {preview_dir}")
 
     # Print directory layout
-    print(f"\n  Preview folders:")
+    print(f"\n  Preview folders breakdown (8 individual + 1 original + 1 combined = 10 total):")
     for subfolder in sorted(preview_dir.iterdir()):
         if subfolder.is_dir():
             count = len(list(subfolder.glob("*.jpg")))
@@ -176,7 +204,7 @@ def main():
     preview_dir = project_root / args.preview_dir
 
     print("=" * 60)
-    print("  Phase 1 - Augmentation Pipeline & Preview")
+    print("  Phase 1 - Augmentation Pipeline & Preview Generator")
     print("=" * 60)
 
     if not train_dir.exists():
@@ -184,7 +212,7 @@ def main():
         print("       Run split_dataset.py first.")
         raise SystemExit(1)
 
-    # Load samples
+    # Load samples strictly from train_dir
     samples = load_sample_images(train_dir, n=args.n_samples, seed=args.seed)
     if not samples:
         print("ERROR: No .jpg images found in data/processed/train/")
@@ -192,43 +220,19 @@ def main():
 
     print(f"  Loaded {len(samples)} sample images from training split.")
 
-    # Define transforms
     full_pipeline = get_full_pipeline()
     individual_transforms = get_individual_transforms()
 
-    print("\n  Augmentation pipeline:")
+    print("\n  Moderated Augmentation Pipeline (for Phase 4 DataLoader):")
     for t in full_pipeline.transforms:
         print(f"    - {t.__class__.__name__}")
 
-    # Generate previews
     generate_previews(samples, preview_dir, full_pipeline, individual_transforms)
 
     print("\n" + "=" * 60)
     print("  Step 4 COMPLETE - augmentation pipeline validated")
-    print(f"  Open {preview_dir} to inspect results visually")
+    print(f"  Inspected previews in {preview_dir}")
     print("=" * 60)
-
-    # Print the pipeline in a copy-paste ready format for Phase 4
-    print("\n  --- Copy this into your Phase 4 DataLoader ---")
-    print("""
-  from albumentations import (
-      Compose, HorizontalFlip, RandomBrightnessContrast,
-      MotionBlur, GaussNoise, Rotate, CoarseDropout,
-      HueSaturationValue, CLAHE,
-  )
-
-  TRAIN_TRANSFORMS = Compose([
-      HorizontalFlip(p=0.5),
-      RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
-      MotionBlur(blur_limit=7, p=0.2),
-      GaussNoise(p=0.3),
-      Rotate(limit=15, p=0.4),
-      CoarseDropout(num_holes_range=(1, 3), hole_height_range=(0.05, 0.15),
-                    hole_width_range=(0.05, 0.15), fill=0, p=0.3),
-      HueSaturationValue(hue_shift_limit=20, sat_shift_limit=30, val_shift_limit=20, p=0.3),
-      CLAHE(clip_limit=4.0, p=0.2),
-  ])
-    """)
 
 
 if __name__ == "__main__":

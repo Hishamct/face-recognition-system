@@ -21,7 +21,7 @@ pytest>=8.0.0
 
 # Computer Vision & Math (Core)
 numpy>=1.26.0
-opencv-python>=4.9.0.80
+opencv-python==4.10.0.84
 pillow>=10.2.0
 
 # Phase 1 — Dataset Pipeline
