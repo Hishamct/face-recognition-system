@@ -13,18 +13,30 @@ import api from '../services/api';
 import FaceCanvas from '../components/FaceCanvas';
 import ImageUploader from '../components/ImageUploader';
 import type { FaceRecognitionItem, RecognitionResponse } from '../types/api.types';
+import { useAnalysis } from '../context/AnalysisContext';
 
 export const ImageAnalysisPage: React.FC = () => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<RecognitionResponse | null>(null);
-  const [selectedFaceIdx, setSelectedFaceIdx] = useState(0);
-  const [similarityThreshold, setSimilarityThreshold] = useState<number>(0.57);
+  const {
+    selectedFile,
+    previewUrl,
+    result,
+    selectedFaceIdx,
+    similarityThreshold,
+    loading,
+    error,
+    setSelectedFile,
+    setPreviewUrl,
+    setResult,
+    setSelectedFaceIdx,
+    setSimilarityThreshold,
+    setLoading,
+    setError,
+    clearAnalysis,
+  } = useAnalysis();
 
   const handleImageSelected = async (file: File) => {
     setSelectedFile(file);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
     setError(null);
@@ -35,11 +47,7 @@ export const ImageAnalysisPage: React.FC = () => {
   };
 
   const handleClear = () => {
-    setSelectedFile(null);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    setResult(null);
-    setError(null);
+    clearAnalysis();
   };
 
   const runRecognition = async (file: File, threshold: number) => {
