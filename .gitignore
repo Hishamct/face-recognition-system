@@ -23,6 +23,10 @@ data/lfw/
 *.mov
 *.webm
 
+# ─── Allow Generated Evaluation Reports & Plots ─────────────
+!reports/**/*.png
+!reports/*.png
+
 
 # ─── Trained Model Weights (Too large for Git) ──────────────
 models/

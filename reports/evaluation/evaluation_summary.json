@@ -1,0 +1,38 @@
+{
+  "evaluation_name": "sface_classifier_head_test_benchmark",
+  "timestamp": "2026-10-20T15:49:30.598946+00:00",
+  "model_path": "models\\classifier_head.pt",
+  "test_dataset": "data\\processed\\aligned_test",
+  "num_classes": 150,
+  "num_known_probes": 624,
+  "num_unknown_probes": 200,
+  "metrics": {
+    "rank1_accuracy_percent": 96.79,
+    "top5_accuracy_percent": 96.79,
+    "mean_reciprocal_rank_mrr": 0.9692,
+    "roc_auc_micro": 0.9969,
+    "roc_auc_macro": 0.9976,
+    "pr_auc_micro": 0.9739,
+    "calibrated_confidence_threshold": 0.9306,
+    "open_set_tpir_percent": 95.83,
+    "open_set_fpir_percent": 4.5,
+    "cmc_ranks": {
+      "Rank-1": 96.79,
+      "Rank-2": 96.79,
+      "Rank-3": 96.79,
+      "Rank-4": 96.79,
+      "Rank-5": 96.79,
+      "Rank-6": 96.96,
+      "Rank-7": 96.96,
+      "Rank-8": 97.12,
+      "Rank-9": 97.28,
+      "Rank-10": 97.28
+    }
+  },
+  "plot_artifacts": {
+    "confusion_matrix": "reports\\evaluation\\confusion_matrix.png",
+    "roc_curve": "reports\\evaluation\\roc_curve.png",
+    "precision_recall_curve": "reports\\evaluation\\precision_recall_curve.png",
+    "cmc_curve": "reports\\evaluation\\cmc_curve.png"
+  }
+}
