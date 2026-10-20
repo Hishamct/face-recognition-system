@@ -9,6 +9,11 @@ hisham-notes/
 data/raw/
 data/processed/
 data/database/
+data/lfw/
+*.tgz
+*.tar.gz
+*.zip
+*.tar
 *.jpg
 *.jpeg
 *.png
@@ -17,6 +22,7 @@ data/database/
 *.avi
 *.mov
 *.webm
+
 
 # ─── Trained Model Weights (Too large for Git) ──────────────
 models/

@@ -23,3 +23,8 @@ pytest>=8.0.0
 numpy>=1.26.0
 opencv-python>=4.9.0.80
 pillow>=10.2.0
+
+# Phase 1 — Dataset Pipeline
+scikit-learn>=1.4.0
+albumentations>=1.4.0
+tqdm>=4.66.0
