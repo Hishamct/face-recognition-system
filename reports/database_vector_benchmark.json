@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-10-20T16:27:20.636641+00:00",
+  "total_test_queries_evaluated": 624,
+  "gallery_size_vectors": 2981,
+  "identities_enrolled": 150,
+  "pgvector_extension_status": {
+    "installed": false,
+    "architecture_note": "PostgreSQL 17 on Windows operates without elevated Windows Administrator rights. Writing compiled DLLs into C:\\Program Files\\PostgreSQL\\17\\ requires administrative elevation (UAC). Native SQL similarity operations are executed via PostgreSQL PL/pgSQL dot_product(real[], real[]) function."
+  },
+  "retrieval_parity": {
+    "faiss_vs_postgres_in_memory": {
+      "queries_evaluated": 624,
+      "identical_matches": 624,
+      "parity_percentage": 100.0,
+      "max_score_difference": 2.384185791015625e-07
+    },
+    "faiss_vs_postgres_sql_function": {
+      "queries_evaluated": 50,
+      "identical_matches": 50,
+      "parity_percentage": 100.0,
+      "max_score_difference": 3.288558959591015e-07
+    }
+  },
+  "latencies_ms_per_query": {
+    "faiss_index_flat_ip": 2.058,
+    "postgres_matrix_cache": 0.82,
+    "postgres_sql_dot_product": 141.79
+  }
+}

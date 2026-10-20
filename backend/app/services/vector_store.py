@@ -18,7 +18,7 @@ import time
 from typing import Optional, Union
 
 import numpy as np
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 try:
@@ -55,8 +55,45 @@ class PostgresVectorStore:
 
     @staticmethod
     def init_tables() -> None:
-        """Create all tables in PostgreSQL if not already present."""
+        """Create all tables in PostgreSQL and initialize vector functions."""
         Base.metadata.create_all(bind=engine)
+        with engine.connect() as conn:
+            # Ensure embedding_array column exists
+            try:
+                conn.execute(text("ALTER TABLE face_embeddings ADD COLUMN IF NOT EXISTS embedding_array real[];"))
+                conn.commit()
+            except Exception:
+                pass
+
+            # Create in-database dot product function
+            try:
+                create_fn = """
+                CREATE OR REPLACE FUNCTION dot_product(a real[], b real[]) RETURNS real AS $$
+                DECLARE
+                    s real := 0;
+                    i int;
+                BEGIN
+                    FOR i IN 1..array_length(a, 1) LOOP
+                        s := s + a[i] * b[i];
+                    END LOOP;
+                    RETURN s;
+                END;
+                $$ LANGUAGE plpgsql IMMUTABLE;
+                """
+                conn.execute(text(create_fn))
+                conn.commit()
+            except Exception:
+                pass
+
+    @staticmethod
+    def has_pgvector() -> bool:
+        """Check if native pgvector extension is installed in PostgreSQL."""
+        try:
+            with engine.connect() as conn:
+                res = conn.execute(text("SELECT 1 FROM pg_extension WHERE extname = 'vector';")).scalar()
+                return res == 1
+        except Exception:
+            return False
 
     def enroll_identity(
         self,
@@ -263,6 +300,38 @@ class PostgresVectorStore:
                 "score": item["score"],
             })
         return results
+
+    def search_in_database_sql(
+        self,
+        query_vec: np.ndarray,
+        top_k: int = 5,
+    ) -> list[dict]:
+        """
+        Execute vector similarity search ENTIRELY inside PostgreSQL engine using pure SQL.
+        Computes dot_product(e.embedding_array, query_vec) on the database server.
+        """
+        q = [float(x) for x in query_vec.flatten()]
+        session = self.get_session()
+        close_needed = self._external_session is None
+
+        try:
+            sql = text("""
+                SELECT i.name AS identity, max(dot_product(e.embedding_array, :q)) AS score
+                FROM face_embeddings e
+                JOIN identities i ON e.identity_id = i.id
+                WHERE i.is_active = true AND e.embedding_array IS NOT NULL
+                GROUP BY i.name
+                ORDER BY score DESC
+                LIMIT :top_k;
+            """)
+            rows = session.execute(sql, {"q": q, "top_k": top_k}).fetchall()
+            return [
+                {"rank": rank, "identity": row[0], "score": float(row[1])}
+                for rank, row in enumerate(rows, start=1)
+            ]
+        finally:
+            if close_needed:
+                session.close()
 
     def identify(
         self,

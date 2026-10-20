@@ -15,6 +15,7 @@ from typing import Optional
 import numpy as np
 
 from sqlalchemy import (
+    ARRAY,
     Boolean,
     Column,
     DateTime,
@@ -63,6 +64,7 @@ class FaceEmbeddingRecord(Base):
     exemplar_type = Column(String(20), default="exemplar", nullable=False)  # 'exemplar' or 'prototype'
     embedding_dim = Column(Integer, default=128, nullable=False)
     embedding_data = Column(LargeBinary, nullable=False)  # Float32 buffer (512 bytes for 128-D)
+    embedding_array = Column(ARRAY(Float), nullable=True)  # Native PostgreSQL float array for pure in-database SQL vector ops
     norm = Column(Float, default=1.0, nullable=False)
     source_image = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -75,10 +77,11 @@ class FaceEmbeddingRecord(Base):
         return np.frombuffer(self.embedding_data, dtype=np.float32)
 
     def set_vector(self, vec: np.ndarray) -> None:
-        """Store float32 numpy vector as binary buffer."""
+        """Store float32 numpy vector as binary buffer and native SQL array."""
         v = vec.astype(np.float32).flatten()
         self.embedding_dim = len(v)
         self.embedding_data = v.tobytes()
+        self.embedding_array = [float(x) for x in v]
         self.norm = float(np.linalg.norm(v))
 
     def __repr__(self) -> str:

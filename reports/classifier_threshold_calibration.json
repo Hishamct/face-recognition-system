@@ -1,0 +1,19 @@
+{
+  "score_type": "maximum_softmax_probability",
+  "calibration_dataset": {
+    "known_validation_probes": 624,
+    "known_validation_path": "data\\processed\\aligned_val",
+    "unknown_validation_probes": 200,
+    "unknown_validation_path": "data\\processed\\aligned_unknown_val"
+  },
+  "optimization_objective": "Find min tau such that validation FPIR <= 0.05",
+  "calibrated_threshold": 0.5697,
+  "validation_metrics": {
+    "tpir_percent": 95.99,
+    "fpir_percent": 5.0,
+    "false_accepts_count": 10,
+    "correct_accepts_count": 599
+  },
+  "timestamp": "2026-10-20T16:36:03.649744+00:00",
+  "protocol_note": "Calibrated exclusively on validation partitions. The test set was NOT accessed during calibration."
+}
