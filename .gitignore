@@ -69,6 +69,7 @@ frontend/dist/
 frontend/.vite/
 frontend/coverage/
 frontend/.eslintcache
+*.tsbuildinfo
 
 # ─── Database Files ─────────────────────────────────────────
 *.sql
