@@ -16,6 +16,15 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
+def get_db():
+    """FastAPI dependency for yielding database session with automatic cleanup."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 def verify_db_connection() -> dict:
     """Verifies connection to PostgreSQL and returns database version."""
     try:

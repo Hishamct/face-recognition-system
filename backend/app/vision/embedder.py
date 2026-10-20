@@ -79,6 +79,9 @@ class FaceEmbedder:
 
         return feat
 
+    # Method alias for extract()
+    extract = embed
+
     def embed_batch(
         self,
         aligned_faces: list[np.ndarray],

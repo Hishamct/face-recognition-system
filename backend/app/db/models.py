@@ -30,9 +30,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 try:
-    from backend.app.db.session import Base
-except ImportError:
     from app.db.session import Base
+except ImportError:
+    from backend.app.db.session import Base
 
 
 class Identity(Base):
@@ -48,7 +48,7 @@ class Identity(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationships
-    embeddings = relationship("FaceEmbeddingRecord", back_populates="identity", cascade="all, delete-orphan")
+    embeddings = relationship(lambda: FaceEmbeddingRecord, back_populates="identity", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<Identity(id={self.id}, name='{self.name}', active={self.is_active})>"
@@ -70,7 +70,7 @@ class FaceEmbeddingRecord(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships
-    identity = relationship("Identity", back_populates="embeddings")
+    identity = relationship(lambda: Identity, back_populates="embeddings")
 
     def get_vector(self) -> np.ndarray:
         """Decode binary buffer into a 128-D float32 numpy vector."""
@@ -125,7 +125,7 @@ class TrainingRun(Base):
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    metrics = relationship("EpochMetric", back_populates="run", cascade="all, delete-orphan")
+    metrics = relationship(lambda: EpochMetric, back_populates="run", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<TrainingRun(id={self.id}, name='{self.run_name}', status='{self.status}')>"
@@ -146,7 +146,7 @@ class EpochMetric(Base):
     recorded_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships
-    run = relationship("TrainingRun", back_populates="metrics")
+    run = relationship(lambda: TrainingRun, back_populates="metrics")
 
     def __repr__(self) -> str:
         return f"<EpochMetric(run_id={self.run_id}, epoch={self.epoch}, train_loss={self.train_loss:.4f}, val_acc={self.val_acc:.2f}%)>"

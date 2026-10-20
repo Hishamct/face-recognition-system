@@ -110,3 +110,6 @@ class IdentityClassifier(nn.Module):
         model.to(device)
         model.eval()
         return model
+
+    # Method alias
+    load_checkpoint = load
